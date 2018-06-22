@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!-- 开始日期和结束日期的布局-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/ui_color_white_ffffff">
+
+        <TextView
+            android:id="@+id/select_date_start_date"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/txt_unit"
+            android:gravity="center"
+            android:textColor="@color/ui_color_black_333333"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/txt_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="至"
+            android:textColor="@color/ui_color_black_333333"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/select_date_end_date"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/txt_unit"
+            android:gravity="center"
+            android:textColor="@color/ui_color_black_333333"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/ui_color_white_e6e6e6" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:background="@color/ui_color_white_ffffff"
+        android:orientation="horizontal"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp">
+
+
+        <com.allen.pickerviewdemo.view.loopview.LoopView
+            android:id="@+id/select_date_year_loop_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <com.allen.pickerviewdemo.view.loopview.LoopView
+            android:id="@+id/select_date_week_or_month_loop_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <com.allen.pickerviewdemo.view.loopview.LoopView
+            android:id="@+id/select_date_day_loop_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/ui_color_white_e6e6e6" />
+    <!-- 重置和确定按钮的布局-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/ui_color_white_ffffff">
+
+        <TextView
+            android:id="@+id/select_date_reset"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="重置"
+            android:textColor="@color/ui_color_blue_00a0e9"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/select_date_confirm"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/ui_color_blue_00a0e9"
+            android:gravity="center"
+            android:text="确定"
+            android:textColor="@color/ui_color_white_ffffff"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/alpha_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.5"
+        android:background="@color/ui_color_white_ffffff" />
+</LinearLayout>
