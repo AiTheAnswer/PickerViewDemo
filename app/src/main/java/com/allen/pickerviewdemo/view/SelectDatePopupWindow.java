@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.allen.pickerviewdemo.R;
 import com.allen.pickerviewdemo.model.DateModel;
 import com.allen.pickerviewdemo.model.DateType;
-import com.allen.pickerviewdemo.utils.DensityUtil;
 import com.allen.pickerviewdemo.view.loopview.LoopListener;
 import com.allen.pickerviewdemo.view.loopview.LoopView;
 
@@ -38,14 +37,18 @@ public class SelectDatePopupWindow extends PopupWindow {
     private int mLoopViewTextSize;
     private int maxYear;
     private int minYear;
-    private List mYearList;
-    private List mWeekOrMonthList;
+    private ArrayList mYearList;
+    private ArrayList mWeekOrMonthList;
     //当前年份
     private int mYear;
     //当前月或者周
     private int mWeekOrMonth;
     //当前天
-    private int mDay;
+    private int mDay = 1;
+    private ArrayList<String> mDayList;
+    private int mYearPos = 0;
+    private int mWeekOrMonthPos = 0;
+    private int mDayPos = 0;
 
     //当前选择那个日期
     enum SelectType {
@@ -102,6 +105,7 @@ public class SelectDatePopupWindow extends PopupWindow {
             mWeekOrMonth = Integer.parseInt(mDefaultDate.getStartDate().split("-")[1]);
             if (mDefaultDate.getType() == DateType.DAY) {
                 mDay = Integer.parseInt(mDefaultDate.getStartDate().split("-")[2]);
+                mDayPos = mDay - 1;
             }
         } else {
             mYear = Integer.parseInt(mDefaultDate.getEndDate().split("-")[0]);
@@ -131,15 +135,16 @@ public class SelectDatePopupWindow extends PopupWindow {
         mWeekOrMonthLoopView.setTextSize(mLoopViewTextSize);
         mDayLoopView.setTextSize(mLoopViewTextSize);
         initPickerViews();
+        initDayPickerView();
     }
 
     private String format2DesDate(DateType type, String date) {
         String dateDes;
         String[] split = date.split("-");
         if (type == DateType.WEEK) {
-            dateDes = split[0] + "第" + split[1] + "周";
+            dateDes = split[0] + "年第" + format2LenStr(Integer.parseInt(split[1])) + "周";
         } else if (type == DateType.MONTH) {
-            dateDes = split[0] + "第" + split[1] + "月";
+            dateDes = split[0] + "年第" + format2LenStr(Integer.parseInt(split[1])) + "月";
         } else {
             dateDes = date;
         }
@@ -154,20 +159,43 @@ public class SelectDatePopupWindow extends PopupWindow {
         if (mDefaultDate.getType().equals(DateType.WEEK)) {
             int maxWeekNumOfYear = getMaxWeekNumOfYear(mYear);
             for (int i = 1; i <= maxWeekNumOfYear; i++) {
-                mWeekOrMonthList.add("第" + i + "周");
+                mWeekOrMonthList.add("第" + format2LenStr(i) + "周");
             }
         } else {//月或者日
             for (int j = 0; j < 12; j++) {
-                mWeekOrMonthList.add(String.valueOf(j + 1) + "月");
+                mWeekOrMonthList.add(format2LenStr(j + 1) + "月");
             }
         }
+        mYearPos = mYear - minYear;
+        mWeekOrMonthPos = mWeekOrMonth - 1;
+        mYearLoopView.setArrayList(mYearList);
+        mYearLoopView.setInitPosition(mYearPos);
+        mWeekOrMonthLoopView.setArrayList(mWeekOrMonthList);
+        mWeekOrMonthLoopView.setInitPosition(mWeekOrMonthPos);
+    }
 
+    /**
+     * Init day item
+     */
+    private void initDayPickerView() {
+        int dayMaxInMonth;
+        Calendar calendar = Calendar.getInstance();
+        mDayList = new ArrayList<>();
 
-        mYearLoopView.setArrayList((ArrayList) mYearList);
-        mYearLoopView.setInitPosition(mYear - minYear);
+        calendar.set(Calendar.YEAR, minYear + mYearPos);
+        calendar.set(Calendar.MONTH, mWeekOrMonthPos);
 
-        mWeekOrMonthLoopView.setArrayList((ArrayList) mWeekOrMonthList);
-        mWeekOrMonthLoopView.setInitPosition(mWeekOrMonth - 1);
+        // get max day in month
+        dayMaxInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        for (int i = 0; i < dayMaxInMonth; i++) {
+            mDayList.add(format2LenStr(i + 1) + "日");
+        }
+        if (mDayPos >= dayMaxInMonth) {
+            mDayPos = dayMaxInMonth - 1;
+        }
+        mDayLoopView.setArrayList(mDayList);
+        mDayLoopView.setInitPosition(mDayPos);
     }
 
     // 获取当前时间所在年的最大周数
@@ -187,7 +215,6 @@ public class SelectDatePopupWindow extends PopupWindow {
     }
 
     private static String format2LenStr(int num) {
-
         return (num < 10) ? "0" + num : String.valueOf(num);
     }
 
@@ -195,21 +222,48 @@ public class SelectDatePopupWindow extends PopupWindow {
         mYearLoopView.setListener(new LoopListener() {
             @Override
             public void onItemSelect(int item) {
-
+                mYearPos = item;
+                initDayPickerView();
+                updateSelectDate();
             }
         });
         mWeekOrMonthLoopView.setListener(new LoopListener() {
             @Override
             public void onItemSelect(int item) {
-
+                mWeekOrMonthPos = item;
+                initDayPickerView();
+                updateSelectDate();
             }
         });
         mDayLoopView.setListener(new LoopListener() {
             @Override
             public void onItemSelect(int item) {
-
+                mDayPos = item;
+                updateSelectDate();
             }
         });
+    }
+
+    /**
+     * 当用户选择滑动选择日期齿轮的时，更改展示的选择
+     */
+    private void updateSelectDate() {
+        int year = mYearPos + minYear;
+        String weekOrMonth = format2LenStr(mWeekOrMonthPos + 1);
+        int day = mDayPos + 1;
+        String dateDesc;
+        if (mDefaultDate.getType() == DateType.DAY) {
+            dateDesc = year + "-" + weekOrMonth + "-" + day;
+        } else if (mDefaultDate.getType() == DateType.MONTH) {
+            dateDesc = year + "年第" + weekOrMonth + "月";
+        } else {
+            dateDesc = year + "年第" + weekOrMonth + "周";
+        }
+        if (mSelectType == SelectType.START_DATE) {
+            mTxtStartDate.setText(dateDesc);
+        } else {
+            mTxtEndDate.setText(dateDesc);
+        }
     }
 
     public void show(View anchor) {
