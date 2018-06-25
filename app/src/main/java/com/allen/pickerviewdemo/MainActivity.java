@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 currentTypeDateList.get(position).setSelected(true);
                 mAdapter.notifyDataSetChanged();
-                selectDate = currentTypeDateList.get(position);
+                selectDate.setData(currentTypeDateList.get(position));
                 Toast.makeText(MainActivity.this, selectDate.toString(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         selectDatePosition = 0;
         currentTypeDateList.get(0).setSelected(true);
-        selectDate = currentTypeDateList.get(0);
+        selectDate = new DateModel(currentTypeDateList.get(0));
         mAdapter.notifyDataSetChanged();
     }
 
@@ -134,14 +134,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onConfirm(DateModel dateModel) {
                 selectDate.setSelected(false);
+                if (selectDatePosition != -1) {
+                    currentTypeDateList.get(selectDatePosition).setSelected(false);
+                    selectDatePosition = -1;
+                }
                 mAdapter.notifyDataSetChanged();
+                selectDate.setStartDate(dateModel.getStartDate());
+                selectDate.setEndDate(dateModel.getEndDate());
                 Toast.makeText(MainActivity.this, dateModel.getStartDate() + "到" + dateModel.getEndDate(), Toast.LENGTH_SHORT).show();
             }
-
-
         };
         SelectDatePopupWindow popupWindow = new SelectDatePopupWindow(this, selectDate, onConfirmListener);
-        popupWindow.showAsDropDown(mDividerView);
+        popupWindow.show(mDividerView);
     }
 
     /**

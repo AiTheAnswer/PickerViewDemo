@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.allen.pickerviewdemo.R;
 import com.allen.pickerviewdemo.model.DateModel;
@@ -41,19 +42,16 @@ public class SelectDatePopupWindow extends PopupWindow implements View.OnClickLi
     private int minYear;
     private ArrayList mYearList;
     private ArrayList mWeekOrMonthList;
+    private ArrayList<String> mDayList;
     //当前年份
     private int mYear;
     //当前月或者周
     private int mWeekOrMonth;
     //当前天
     private int mDay = 1;
-    private ArrayList<String> mDayList;
     private int mYearPos = 0;
     private int mWeekOrMonthPos = 0;
     private int mDayPos = 0;
-    //是否是点击确认按钮关闭的PopupWindow
-    private boolean isConfirmDismiss;
-
 
     //当前选择那个日期
     enum SelectType {
@@ -89,7 +87,7 @@ public class SelectDatePopupWindow extends PopupWindow implements View.OnClickLi
     }
 
     private void initData() {
-        mLoopViewTextSize = 20;
+        mLoopViewTextSize = 18;
         maxYear = 2050;
         minYear = 1900;
         mTxtStartDate.setText(format2DesDate(mDefaultDate.getType(), mDefaultDate.getStartDate()));
@@ -338,9 +336,12 @@ public class SelectDatePopupWindow extends PopupWindow implements View.OnClickLi
                 setSelectType(mSelectType);
                 break;
             case R.id.select_date_confirm://确定
-                isConfirmDismiss = true;
-                mConfirmListener.onConfirm(mSelectDate);
-                dismiss();
+                if (startDateLessOrEqualEndDate(mSelectDate)) {
+                    mConfirmListener.onConfirm(mSelectDate);
+                    dismiss();
+                } else {
+                    Toast.makeText(mContext, "开始日期大于结束日期，请重新选择日期", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.alpha_view://透明区域
                 dismiss();
@@ -349,12 +350,37 @@ public class SelectDatePopupWindow extends PopupWindow implements View.OnClickLi
 
     }
 
-    public void show(View anchor) {
-        showAsDropDown(anchor);
+    /**
+     * 判断开始日期是否小于等于结束日期
+     *
+     * @param selectDate 选择的日期
+     * @return true 开始日期小于等于结束日期 false  反之
+     */
+    private boolean startDateLessOrEqualEndDate(DateModel selectDate) {
+        String[] startDate = selectDate.getStartDate().split("-");
+        String[] endDate = selectDate.getEndDate().split("-");
+        int startYear = Integer.parseInt(startDate[0]);
+        int endYear = Integer.parseInt(endDate[0]);
+        int startWeekOrMonth = Integer.parseInt(startDate[1]);
+        int endWeekOrMonth = Integer.parseInt(endDate[1]);
+        if (startYear > endYear) {
+            return false;
+        }
+        if (startWeekOrMonth > endWeekOrMonth) {
+            return false;
+        }
+        if (selectDate.getType() == DateType.DAY) {
+            int startDay = Integer.parseInt(startDate[2]);
+            int endDay = Integer.parseInt(endDate[2]);
+            if (startWeekOrMonth == endWeekOrMonth && startDay > endDay) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public void setIsConfirmDismiss(boolean isConfirmDismiss) {
-        this.isConfirmDismiss = isConfirmDismiss;
+    public void show(View anchor) {
+        showAsDropDown(anchor);
     }
 
     public interface OnConfirmListener {

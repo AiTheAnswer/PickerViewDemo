@@ -15,6 +15,21 @@ public class DateModel {
         this.isSelected = isSelected;
     }
 
+    public DateModel(DateModel dateModel) {
+        this.type = dateModel.getType();
+        this.name = dateModel.getName();
+        this.startDate = dateModel.getStartDate();
+        this.endDate = dateModel.getEndDate();
+        this.isSelected = dateModel.isSelected();
+    }
+    public void setData(DateModel dateModel){
+        this.type = dateModel.getType();
+        this.name = dateModel.getName();
+        this.startDate = dateModel.getStartDate();
+        this.endDate = dateModel.getEndDate();
+        this.isSelected = dateModel.isSelected();
+    }
+
     public DateType getType() {
         return type;
     }
