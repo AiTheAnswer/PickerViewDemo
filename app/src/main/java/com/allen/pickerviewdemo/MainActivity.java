@@ -82,8 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         currentTypeDateList = new ArrayList<>();
         mAdapter = new DateSelectGridViewAdapter(this, currentTypeDateList);
         mDefaultDateGridView.setAdapter(mAdapter);
-        mSelectDateType = DateType.DAY;
-        setDateType(DateType.WEEK);
+        setDateType(DateType.DAY);
     }
 
     private void initDefaultDateType() {
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setDateType(DateType type) {
-        if (mSelectDateType.equals(type)) {
+        if (null != mSelectDateType && mSelectDateType.equals(type)) {
             return;
         } else {
             mSelectDateType = type;
@@ -131,7 +130,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 显示自定义选择日期的PopupWindow
      */
     private void showDateSelectPopupWindow() {
-        SelectDatePopupWindow popupWindow = new SelectDatePopupWindow(this, selectDate);
+        SelectDatePopupWindow.OnConfirmListener onConfirmListener = new SelectDatePopupWindow.OnConfirmListener() {
+            @Override
+            public void onConfirm(DateModel dateModel) {
+                selectDate.setSelected(false);
+                mAdapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this, dateModel.getStartDate() + "到" + dateModel.getEndDate(), Toast.LENGTH_SHORT).show();
+            }
+
+
+        };
+        SelectDatePopupWindow popupWindow = new SelectDatePopupWindow(this, selectDate, onConfirmListener);
         popupWindow.showAsDropDown(mDividerView);
     }
 

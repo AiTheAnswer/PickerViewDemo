@@ -43,8 +43,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:numColumns="4"
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp" />
+                />
 
             <View
                 android:layout_width="1dp"
@@ -81,6 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@mipmap/ai" />
+        android:background="@color/ui_color_blue_00a0e9"
+         />
 
 </LinearLayout>

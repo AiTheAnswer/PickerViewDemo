@@ -71,6 +71,12 @@ public class SelectDateTypePopupWindow extends PopupWindow {
         return mSelectDateType;
     }
 
+    public void setSelectDateType(DateType dateType) {
+        this.mSelectDateType = dateType;
+        mAdapter = new SelectDateTypePopupListAdapter(mContext, mDateTypes, mSelectDateType);
+        mListView.setAdapter(mAdapter);
+    }
+
     /**
      * 显示PopupWindow在某个View的下面
      *
