@@ -18,7 +18,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class LoopView extends View {
-
     // Timer mTimer;
     ScheduledExecutorService mExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> mFuture;
@@ -56,6 +55,7 @@ public class LoopView extends View {
     float y1;
     float y2;
     float dy;
+    private String as[];
 
     public LoopView(Context context) {
         this(context, null);
@@ -72,7 +72,7 @@ public class LoopView extends View {
     }
 
     private void init(Context context) {
-        textSize = 0;
+        textSize = (int) (context.getResources().getDisplayMetrics().density * 16);
         colorGray = 0xff999999;
         colorBlack = 0xff333333;
         colorGrayLight = 0xffe6e6e6;
@@ -87,7 +87,6 @@ public class LoopView extends View {
         simpleOnGestureListener = new LoopViewGestureListener(this);
         handler = new MessageHandler(this);
         this.context = context;
-        setTextSize(16F);
         paintA = new Paint();
         paintB = new Paint();
         paintC = new Paint();
@@ -106,6 +105,8 @@ public class LoopView extends View {
         paintC.setAntiAlias(true);
         paintC.setTypeface(Typeface.MONOSPACE);
         paintC.setTextSize(textSize);
+
+        as = new String[itemCount];
     }
 
     private void initLoopView(Context context) {
@@ -113,17 +114,13 @@ public class LoopView extends View {
         gestureDetector.setIsLongpressEnabled(false);
     }
 
-    static int getSelectedItem(LoopView loopview) {
-        return loopview.selectedItem;
+    public final void setArrayList(ArrayList arraylist) {
+        this.arrayList = arraylist;
+        totalScrollY = 0;
+        initData();
+        invalidate();
     }
 
-    static void smoothScroll(LoopView loopview) {
-        loopview.smoothScroll();
-    }
-
-    public void setLineSpacingMultiplier(float spacingMultiplier){
-        this.lineSpacingMultiplier = spacingMultiplier;
-    }
     private void initData() {
         if (arrayList == null) {
             return;
@@ -150,116 +147,13 @@ public class LoopView extends View {
         preCurrentIndex = initPosition;
     }
 
-    private void measureTextWidthHeight() {
-        Rect rect = new Rect();
-        for (int i = 0; i < arrayList.size(); i++) {
-            String s1 = (String) arrayList.get(i);
-            paintB.getTextBounds(s1, 0, s1.length(), rect);
-            int textWidth = rect.width();
-            if (textWidth > maxTextWidth) {
-                maxTextWidth = textWidth;
-            }
-            paintB.getTextBounds("\u661F\u671F", 0, 2, rect); // 星期
-            int textHeight = rect.height();
-            if (textHeight > maxTextHeight) {
-                maxTextHeight = textHeight;
-            }
-        }
-
-    }
-
-    // private void smoothScroll() {
-    // int offset = (int) ((float) totalScrollY % (lineSpacingMultiplier * (float) maxTextHeight));
-    // Timer timer = new Timer();
-    // mTimer = timer;
-    // timer.schedule(new MTimer(this, offset, timer), 0L, 10L);
-    // }
-
-    private void smoothScroll() {
-        int offset = (int) (totalScrollY % (lineSpacingMultiplier * maxTextHeight));
-        cancelFuture();
-        mFuture = mExecutor.scheduleWithFixedDelay(new MTimer(this, offset), 0, 10, TimeUnit.MILLISECONDS);
-    }
-
-    public void cancelFuture() {
-        if (mFuture != null && !mFuture.isCancelled()) {
-            mFuture.cancel(true);
-            mFuture = null;
-        }
-    }
-
-    public final void setNotLoop() {
-        isLoop = false;
-    }
-
-    public final void setTextSize(float size) {
-        if (size > 0.0F) {
-            textSize = (int) (context.getResources().getDisplayMetrics().density * size);
-        }
-    }
-
-    public final void setInitPosition(int initPosition) {
-        this.initPosition = initPosition;
-    }
-
-    public final void setListener(LoopListener LoopListener) {
-        loopListener = LoopListener;
-    }
-
-    public final void setArrayList(ArrayList arraylist) {
-        this.arrayList = arraylist;
-        totalScrollY = 0;
-        initData();
-        invalidate();
-    }
-
-    // @Override
-    // public int getPaddingLeft() {
-    // return paddingLeft;
-    // }
-    //
-    // @Override
-    // public int getPaddingRight() {
-    // return paddingRight;
-    // }
-    //
-    // public void setViewPadding(int left, int top, int right, int bottom) {
-    // paddingLeft = left;
-    // paddingRight = right;
-    // }
-
-    public final int getSelectedItem() {
-        return selectedItem;
-    }
-
-    //
-    // protected final void smoothScroll(float velocityY) {
-    // Timer timer = new Timer();
-    // mTimer = timer;
-    // timer.schedule(new LoopTimerTask(this, velocityY, timer), 0L, 20L);
-    // }
-
-    protected final void smoothScroll(float velocityY) {
-        cancelFuture();
-        int velocityFling = 20;
-        mFuture = mExecutor.scheduleWithFixedDelay(new LoopTimerTask(this, velocityY), 0, velocityFling,
-                TimeUnit.MILLISECONDS);
-    }
-
-    protected final void itemSelected() {
-        if (loopListener != null) {
-            postDelayed(new LoopRunnable(this), 200L);
-        }
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
-        String as[];
+
         if (arrayList == null) {
             super.onDraw(canvas);
             return;
         }
-        as = new String[itemCount];
         change = (int) (totalScrollY / (lineSpacingMultiplier * maxTextHeight));
         preCurrentIndex = initPosition + change % arrayList.size();
         // Log.i("test", (new StringBuilder("scrollY1=")).append(totalScrollY).toString());
@@ -410,4 +304,117 @@ public class LoopView extends View {
         }
         return true;
     }
+
+    static int getSelectedItem(LoopView loopview) {
+        return loopview.selectedItem;
+    }
+
+    static void smoothScroll(LoopView loopview) {
+        loopview.smoothScroll();
+    }
+
+    /**
+     * 设置行之间的间隔比例
+     *
+     * @param spacingMultiplier 比例值
+     */
+    public void setLineSpacingMultiplier(float spacingMultiplier) {
+        this.lineSpacingMultiplier = spacingMultiplier;
+    }
+
+    private void measureTextWidthHeight() {
+        Rect rect = new Rect();
+        for (int i = 0; i < arrayList.size(); i++) {
+            String s1 = (String) arrayList.get(i);
+            paintB.getTextBounds(s1, 0, s1.length(), rect);
+            int textWidth = rect.width();
+            if (textWidth > maxTextWidth) {
+                maxTextWidth = textWidth;
+            }
+            paintB.getTextBounds("\u661F\u671F", 0, 2, rect); // 星期
+            int textHeight = rect.height();
+            if (textHeight > maxTextHeight) {
+                maxTextHeight = textHeight;
+            }
+        }
+
+    }
+    // timer.schedule(new MTimer(this, offset, timer), 0L, 10L);
+    // mTimer = timer;
+    // Timer timer = new Timer();
+    // int offset = (int) ((float) totalScrollY % (lineSpacingMultiplier * (float) maxTextHeight));
+    // private void smoothScroll() {
+
+    // }
+
+    private void smoothScroll() {
+        int offset = (int) (totalScrollY % (lineSpacingMultiplier * maxTextHeight));
+        cancelFuture();
+        mFuture = mExecutor.scheduleWithFixedDelay(new MTimer(this, offset), 0, 10, TimeUnit.MILLISECONDS);
+    }
+
+    public void cancelFuture() {
+        if (mFuture != null && !mFuture.isCancelled()) {
+            mFuture.cancel(true);
+            mFuture = null;
+        }
+    }
+
+    public final void setNotLoop() {
+        isLoop = false;
+    }
+
+    public final void setTextSize(float size) {
+        if (size > 0.0F) {
+            textSize = (int) (context.getResources().getDisplayMetrics().density * size);
+        }
+    }
+
+    public final void setInitPosition(int initPosition) {
+        this.initPosition = initPosition;
+    }
+
+    public final void setListener(LoopListener LoopListener) {
+        loopListener = LoopListener;
+    }
+
+    // @Override
+    // public int getPaddingLeft() {
+    // return paddingLeft;
+    // }
+    //
+    // @Override
+    // public int getPaddingRight() {
+    // return paddingRight;
+    // }
+    //
+    // public void setViewPadding(int left, int top, int right, int bottom) {
+    // paddingLeft = left;
+    // paddingRight = right;
+    // }
+
+    public final int getSelectedItem() {
+        return selectedItem;
+    }
+
+    //
+    // protected final void smoothScroll(float velocityY) {
+    // Timer timer = new Timer();
+    // mTimer = timer;
+    // timer.schedule(new LoopTimerTask(this, velocityY, timer), 0L, 20L);
+    // }
+
+    protected final void smoothScroll(float velocityY) {
+        cancelFuture();
+        int velocityFling = 20;
+        mFuture = mExecutor.scheduleWithFixedDelay(new LoopTimerTask(this, velocityY), 0, velocityFling,
+                TimeUnit.MILLISECONDS);
+    }
+
+    protected final void itemSelected() {
+        if (loopListener != null) {
+            postDelayed(new LoopRunnable(this), 200L);
+        }
+    }
+
 }
