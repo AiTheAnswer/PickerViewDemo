@@ -366,7 +366,7 @@ public class SelectDatePopupWindow extends PopupWindow implements View.OnClickLi
         if (startYear > endYear) {
             return false;
         }
-        if (startWeekOrMonth > endWeekOrMonth) {
+        if (startYear == endYear && startWeekOrMonth > endWeekOrMonth) {
             return false;
         }
         if (selectDate.getType() == DateType.DAY) {
